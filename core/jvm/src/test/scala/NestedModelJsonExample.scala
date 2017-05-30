@@ -6,7 +6,7 @@ import cats.implicits._
 
 import Json._
 
-class NestedModelJson extends FlatSpec with Matchers {
+class NestedModelJsonExample extends FlatSpec with Matchers {
 
   case class Model1(id: Int, name: String, values: List[String], valid: Boolean)
   case class Model2(values: List[Model1], value2: Model1)
@@ -19,7 +19,7 @@ class NestedModelJson extends FlatSpec with Matchers {
           |@| o \[String]       "name"
           |@| o \[List[String]] "values"
           |@| o \[Boolean]      "valid"
-        ).map(Model1.apply)
+          ).map(Model1.apply)
         }
     }
 
@@ -29,7 +29,7 @@ class NestedModelJson extends FlatSpec with Matchers {
         withObject("Model2") { o =>
           (   o \[List[Model1]] "values"
           |@| o \[Model1]       "value2"
-        ).map(Model2.apply)
+          ).map(Model2.apply)
         }
     }
 

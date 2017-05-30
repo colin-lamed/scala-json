@@ -10,27 +10,13 @@ import org.typelevel.discipline.scalatest.Discipline
 
 import org.scalacheck.Arbitrary.arbitrary
 
-class ResultTests extends FunSuite with Matchers with Discipline /* with GeneratorDrivenPropertyChecks*/ {
+class CatsSpec extends FunSuite with Matchers with Discipline with JsonArbitrary {
 
-  implicit def results[A](implicit aGen: Gen[A]): Gen[Result[A]] = {
-    for {
-      x <- aGen
-      b <- arbitrary[Boolean]
-    } yield {
-      if (b) Success(x)
-      else Error(Nil, "msg")
-    }
-  }
-
-  val genIntResults: Gen[Result[Int]] = results[Int](arbitrary[Int])
+  val genIntResults: Gen[Result[Int]] = genResult[Int](arbitrary[Int])
 
   implicit val arbIntResults: Arbitrary[Result[Int]] = Arbitrary(genIntResults)
 
-  val genIntToInt: Gen[Int => Int] = {
-    val f: Int => Int = x => x
-    Gen.const(f)
-  }
-  val genIntToIntResults: Gen[Result[Int => Int]] = results[Int => Int](genIntToInt)
+  val genIntToIntResults: Gen[Result[Int => Int]] = genResult[Int => Int](genAtoA[Int])
   implicit val arbIntToIntResuts: Arbitrary[Result[Int => Int]] = Arbitrary(genIntToIntResults)
 
 

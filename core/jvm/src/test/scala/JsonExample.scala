@@ -1,12 +1,12 @@
 package json
 
-import org.scalatest._
+import org.scalatest.{FunSuite, Matchers}
 
 import cats.implicits._
 
 import Json._
 
-class JsonTest extends FlatSpec with Matchers {
+class JsonExample extends FunSuite with Matchers {
 
   case class Device(id: Int, name: String, values: List[String], valid: Boolean)
 
@@ -77,88 +77,76 @@ class JsonTest extends FlatSpec with Matchers {
            )
     }
 
-  "Json" should "parse tuple 1" in {
+  test("Json should parse tuple 1") {
     implicit val a = fromJsonForTuple1
-    decodeEither[(Int, String, List[String], Boolean)]("""{"id": 1, "name": "nameVal", "values": ["one", "two"], "valid": true}""") should be (
+    decodeEither[(Int, String, List[String], Boolean)]("""{"id": 1, "name": "nameVal", "values": ["one", "two"], "valid": true}""") shouldEqual
       Right((1, "nameVal", List("one", "two"), true))
-    )
   }
 
-  it should "parse tuple 2" in {
+  test("Json should parse tuple 2") {
     implicit val a = fromJsonForTuple2
-    decodeEither[(Int, String, List[String], Boolean)]("""{"id": 1, "name": "nameVal", "values": ["one", "two"], "valid": true}""") should be (
+    decodeEither[(Int, String, List[String], Boolean)]("""{"id": 1, "name": "nameVal", "values": ["one", "two"], "valid": true}""") shouldEqual
       Right((1, "nameVal", List("one", "two"), true))
-    )
   }
 
-  it should "parse Device" in {
+  test("Json should parse Device") {
     implicit val a = fromJsonForDevice
-    decodeEither[Device]("""{"id": 1, "name": "nameVal", "values": ["one", "two"], "valid": true}""") should be (
+    decodeEither[Device]("""{"id": 1, "name": "nameVal", "values": ["one", "two"], "valid": true}""") shouldEqual
       Right(Device(1, "nameVal", List("one", "two"), true))
-    )
   }
 
-  it should "fail to parse Device with bad json" in {
+  test("Json should fail to parse Device with bad json") {
     implicit val a = fromJsonForDevice
-    decodeEither[Device]("""{""") should be (
+    decodeEither[Device]("""{""") shouldEqual
       Left("Could not parse json: \"}\":1:2 ...\"\"")
-    )
   }
 
-  it should "fail to parse Device with wrong type" in {
+  test("Json should fail to parse Device with wrong type") {
     implicit val a = fromJsonForDevice
-    decodeEither[Device]("""[]""") should be (
+    decodeEither[Device]("""[]""") shouldEqual
       Left("expected Device object, encountered Array")
-    )
   }
 
-  it should "fail to parse tuple with missing key" in {
+  test("Json should fail to parse tuple with missing key") {
     implicit val a = fromJsonForTuple1
-    decodeEither[(Int, String, List[String], Boolean)]("""{"id": 1, "name1": "nameVal", "values": ["one", "two"], "valid": true}""") should be (
+    decodeEither[(Int, String, List[String], Boolean)]("""{"id": 1, "name1": "nameVal", "values": ["one", "two"], "valid": true}""") shouldEqual
       Left("key 'name' not present")
-    )
   }
 
-  it should "fail to parse tuple with wrong type" in {
+  test("Json should fail to parse tuple with wrong type") {
     implicit val a = fromJsonForTuple1
-    decodeEither[(Int, String, List[String], Boolean)]("""{"id": "1", "name": "nameVal", "values": ["one", "two"], "valid": true}""") should be (
+    decodeEither[(Int, String, List[String], Boolean)]("""{"id": "1", "name": "nameVal", "values": ["one", "two"], "valid": true}""") shouldEqual
       Left("expected Number, encountered String")
-    )
   }
 
-  it should "encode json for manual toJsonForDevice " in {
+  test("Json should encode json for manual toJsonForDevice") {
     implicit val a = toJsonForDevice
-    encode(Device(1, "nameVal", List("one", "two"), true)) should be (
+    encode(Device(1, "nameVal", List("one", "two"), true)) shouldEqual
       """{"id": 1, "name": "nameVal", "values": ["one", "two"], "valid": true}"""
-    )
   }
 
-  it should "encode json for toJsonForDevice depending on implicit toJsons" in {
+  test("Json should encode json for toJsonForDevice depending on implicit toJsons") {
     implicit val a = toJsonForDevice2
-    encode(Device(1, "nameVal", List("one", "two"), true)) should be (
+    encode(Device(1, "nameVal", List("one", "two"), true)) shouldEqual
       """{"id": 1, "name": "nameVal", "values": ["one", "two"], "valid": true}"""
-    )
   }
 
-  it should "encode json for toJsonForDevice with helper syntax" in {
+  test("Json should encode json for toJsonForDevice with helper syntax") {
     implicit val a = toJsonForDevice3
-    encode(Device(1, "nameVal", List("one", "two"), true)) should be (
+    encode(Device(1, "nameVal", List("one", "two"), true)) shouldEqual
       """{"id": 1, "name": "nameVal", "values": ["one", "two"], "valid": true}"""
-    )
   }
 
-  it should "enable parsing string to jsValue, and jsValue to model" in {
+  test("Json should enable parsing string to jsValue, and jsValue to model") {
     implicit val a = fromJsonForDevice
     val eitherJsValue = JsonParser.parse("""{"id": 1, "name": "nameVal", "values": ["one", "two"], "valid": true}""")
-    eitherJsValue should be (
+    eitherJsValue shouldEqual
       Right(JsObject(Map("id" -> JsNumber(1),
                          "name" -> JsString("nameVal"),
                          "values" -> JsArray(List(JsString("one"), JsString("two"))),
                          "valid" -> JsBool(true))))
-    )
     val Right(jsValue) = eitherJsValue
-    parseJson[Device](jsValue) should be (
+    parseJson[Device](jsValue) shouldEqual
       Success(Device(1, "nameVal", List("one", "two"), true))
-    )
   }
 }
